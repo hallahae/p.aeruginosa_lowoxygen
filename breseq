@@ -1,0 +1,5 @@
+#  this is the tool I used to carry out the breseq pipeline in order to see my mutations present in each sample
+# GCF file is the reference genome and then I used my trimmed fasta files to gain outputs for each sample
+
+breseq -r home/hallahae/kroegerlab/common/reference/GCF_000963815.1_ASM96381v1_srna_seq.gff
+ -j 1 -o kroegerlab/common/pa_hypoxia/H1_breseq_results_locus_tag kroegerlab/common/pa_hypoxia/data/H1_1_p_clipped.fastq.gz kroegerlab/common/pa_hypoxia/data/H1_2_p_clipped.fastq.gz
