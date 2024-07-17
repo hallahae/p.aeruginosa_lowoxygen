@@ -1,0 +1,87 @@
+# this is the R script i used in order to carry out gene enrichment analysis on my samples
+
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("limma")
+BiocManager::install("VennDetail")
+install.packages("ggVennDiagram")
+library(ggVennDiagram)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(readxl)
+library(here)
+library(skimr) # install.packages('skimr')
+library(kableExtra) # install.packages('kableExtra')
+library(rgl)
+library(limma)
+library (VennDetail)
+library(readr)
+#deseq2 result files
+working_dir = ("/Users/emilyhallahan/Desktop/Research_Project/") # the path to the working directory
+data_2h <- read.csv(paste(working_dir,"res2h_hyp_2.csv", sep=""), sep=",", header = TRUE) #
+data_24h <- read.csv(paste(working_dir,"res24h_hyp_2.csv", sep=""), sep=",", header = TRUE) #
+
+str(data_2h_up)
+data_2h_down
+
+data_2h_up <- data_2h[data_2h$log2FoldChange>=1 & data_2h$padj<0.05,]$Gene
+data_2h_down <- data_2h[data_2h$log2FoldChange<=-1 & data_2h$padj<0.05,]$Gene
+data_24h_up <- data_24h[data_24h$log2FoldChange>=1 & data_24h$padj<0.05,]$Gene
+data_24h_down <- data_24h[data_24h$log2FoldChange<=-1 & data_24h$padj<0.05,]$Gene
+#idmapping_GO_pa6D92H_locustag
+pa_GO_uni <- read.csv("/Users/emilyhallahan/Desktop/Research_Project/idmapping_GO_pa6D92H_locustag.txt", sep="\t", header = TRUE) #
+gene_GO
+path_GO
+de_genes
+
+
+colnames(kegga_res)
+colnames(path_GO)
+
+go_annot <- function(pa_GO_uni, data_2h) {
+  gene_GO <- pa_GO_uni[, c(1, 3)] #locus_tag, gene ontology
+  path_GO <- unique(pa_GO_uni[,3:4])#gene ontology, description
+  colnames(pa_GO_uni)
+  kegga_res <- kegga(de = data_2h, gene.pathway = gene_GO)
+  kegga_res$GO.ter <- rownames(kegga_res)
+  print(kegga_res)
+  kegga_res_path <- merge(kegga_res, path_GO, by = "GO.ter", all.x = TRUE, all.y = FALSE)
+  
+  return (kegga_res_path)
+}
+
+##
+
+
+kegga_up_2h <- go_annot(pa_GO_uni, data_2h_up)
+kegga_up_2h_0.01 <- kegga_up_2h[kegga_up_2h$P.DE<=0.01,]
+write_csv(kegga_up_2h_0.01, paste(working_dir,"PA_2h_up_GO_enrichment.csv", sep=""))
+
+kegga_down_2h <- go_annot(pa_GO_uni, data_2h_down)
+kegga_down_2h_0.01 <- kegga_down_2h[kegga_down_2h$P.DE<=0.01,]
+write_csv(kegga_down_2h_0.01, paste(working_dir,"PA_2h_down_GO_enrichment.csv", sep=""))
+
+##############
+
+go_annot24 <- function(pa_GO_uni, data_24h) {
+  gene_GO <- pa_GO_uni[, c(1, 3)] #locus_tag, gene ontology
+  path_GO <- unique(pa_GO_uni[,3:4])#gene ontology, description
+  colnames(pa_GO_uni)
+  kegga_res24 <- kegga(de = data_24h, gene.pathway = gene_GO)
+  kegga_res24$GO.ter <- rownames(kegga_res24)
+  print(kegga_res24)
+  kegga_res_path24 <- merge(kegga_res24, path_GO, by = "GO.ter", all.x = TRUE, all.y = FALSE)
+  
+  return (kegga_res_path24)
+}
+
+#######
+
+kegga_up_24h <- go_annot(pa_GO_uni, data_24h_up)
+kegga_up_24h_0.01 <- kegga_up_24h[kegga_up_24h$P.DE<=0.01,]
+write_csv(kegga_up_24h_0.01, paste(working_dir,"PA_24h_up_GO_enrichment.csv", sep=""))
+
+kegga_down_24h <- go_annot(pa_GO_uni, data_24h_down)
+kegga_down_24h_0.01 <- kegga_down_24h[kegga_down_24h$P.DE<=0.01,]
+write_csv(kegga_down_24h_0.01, paste(working_dir,"PA_24h_down_GO_enrichment.csv", sep=""))
