@@ -1,0 +1,9 @@
+# I used this set of commands to prepare a phylogeny of all my samples used in the analysis, I then uploaded the final file to iToL to visualise the tree
+
+PanACoTA annotate -d genomes -r final_panacota_alignment -n psae -l genomes/final_genomes.lst #this final genomes list contains all fasta files for each sample
+
+PanACoTA corepers -p panakota_pangenome02-07-24/PanGenome-psae.All.prt-clust-0.8-mode1-th40.lst -o panacota_corepers0.95-02-07-24 -t 0.95
+
+PanACoTA align -c panacota_corepers0.95-02-07-24/PersGenome_PanGenome-psae.All.prt-clust-0.8-mode1-th40.lst-all_0.95.lst -l ref_panacota_alignment_final/LSTINFO-final_genomes.lst -n psae -d ref_panacota_alignment_final/ -o panacota_align-02-07-24 --threads 40
+
+PanACoTA tree -b 1000 -a panacota_align-02-07-24/Phylo-psae/psae.nucl.grp.aln -o panacota_tree_full_02_07_24_bootstrap_1000 --threads 40
