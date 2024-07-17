@@ -1,0 +1,39 @@
+# I used this python notebook in order to sort my barcode bed files for A methylation in order to get the top 100 methylated reads
+
+path1 = "/mnt/md0/kroegerlab/common/pa_hypoxia/nanopore_results/"
+path2 = "/mnt/md0/kroegerlab/common/pa_hypoxia/nanopore_over10_A/"
+
+import pandas as pd
+
+bed_file = path1 + 'SQK-NBD114-24_barcode01.GCF_003698455.sorted.6mA.bed'
+with open(bed_file, 'r') as file:
+    content = file.read()
+
+# Replace all spaces with tabs
+content = content.replace(' ', '\t')
+
+temp_bed_file = path2 + 'temp_bed_file.bed'
+with open(temp_bed_file, 'w') as file:
+    file.write(content)
+
+# Load the modified BED file into a pandas DataFrame
+columns = [f'col{i}' for i in range(1, 19)]
+df = pd.read_csv(temp_bed_file, sep='\t', header=None, names=columns)
+
+
+# Filter rows where the value in the 5th column (col5) is greater than 10
+# this is the reads
+filtered_df = df[df['col5'].astype(int) > 10]
+
+
+# Sort the filtered DataFrame by the 11th column (col11) in descending order
+sorted_df = filtered_df.sort_values(by='col11', ascending=False)
+
+# Preview the sorted DataFrame
+print("\nSorted DataFrame Preview:")
+print(sorted_df.head())
+# Save the result to a new BED file
+output_bed_file = path2 + 'nanopore_>10_barcode01.PA.bed'
+sorted_df.to_csv(output_bed_file, sep='\t', header=False, index=False)
+
+print(f'\nSuccessfully saved the filtered and sorted data to {output_bed_file}')
