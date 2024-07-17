@@ -1,0 +1,6 @@
+# i used these commands in order to find the GATC methylation motif in my nanopore sequenced samples and get a meme.html result 
+
+seqkit locate -d -p GATC --bed ../genomes/GCF_003698455-Copy1.1_ASM369845v1_genomic.fna >  GCF003698455_GATC.bed
+for i in SQK*6mA.bed; do bedtools intersect -wa -wb -a $i -b GCF003698455_GATC.bed > ${i%%.bed}_GATC_GCF_003698455.bed; done
+
+meme dam_groups_35_31bp_strand.fasta -maxsize 300000 -dna -mod zoops -nmotifs 3 -oc dam_groups_35_31
