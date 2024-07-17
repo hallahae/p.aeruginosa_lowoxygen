@@ -1,0 +1,196 @@
+# I used this R script (provided by my supervisor) and made the necessary changes in order to analyse my samples and create graphical respresentations of methylation
+
+install.packages('tidyverse', 'dplyr')
+install.packages('magick')
+install.packages("RColorBrewer")
+install.packages("ggsci")
+install.packages('circlize')
+BiocManager::install("ComplexHeatmap")
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(readxl)
+library(here)
+library(skimr) # install.packages('skimr')
+library(kableExtra) # install.packages('kableExtra')
+library("FactoMineR")
+library(ggcorrplot)
+library('corrr')
+library('factoextra')
+library(rgl) #3D scatter plot
+library(magick) #3D
+library(RColorBrewer)
+library(ggsci)
+working_dir = "/Users/emilyhallahan/Desktop/nanopore_methylation/" # the path to the working directory
+SQK-NBD114-24_barcode21.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed
+SQK-NBD114-24_barcode02.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed  SQK-NBD114-24_barcode22.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed
+SQK-NBD114-24_barcode19.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed  SQK-NBD114-24_barcode23.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed
+SQK-NBD114-24_barcode20.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed  SQK-NBD114-24_barcode24.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed
+
+
+data_01 <- read.csv(paste(working_dir,"SQK-NBD114-24_barcode01.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed", sep=""), sep = "", header = FALSE, 
+                    col.names = c('chrom', 'm_start', 'm_stop', 'met_type', 'total_reads', 'met_dir', 'met_st_1', 'met_st_2', 'color','reads_all', 'methyl', 'methyl_reads', 'non_methyl_reads',
+                                  'v1','v2','v3', 'v4', 'v5', 'chrom-2', 'site_start', 'site_stop', 'site', 'v6', 'dir')) #
+data_02 <- read.csv(paste(working_dir,"SQK-NBD114-24_barcode02.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed", sep=""), sep = "", header = FALSE, 
+                    col.names = c('chrom', 'm_start', 'm_stop', 'met_type', 'total_reads', 'met_dir', 'met_st_1', 'met_st_2', 'color','reads_all', 'methyl', 'methyl_reads', 'non_methyl_reads',
+                                  'v1','v2','v3', 'v4', 'v5', 'chrom-2', 'site_start', 'site_stop', 'site', 'v6', 'dir'))
+data_19 <- read.csv(paste(working_dir,"SQK-NBD114-24_barcode19.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed", sep=""), sep = "", header = FALSE, 
+                    col.names = c('chrom', 'm_start', 'm_stop', 'met_type', 'total_reads', 'met_dir', 'met_st_1', 'met_st_2', 'color','reads_all', 'methyl', 'methyl_reads', 'non_methyl_reads',
+                                  'v1','v2','v3', 'v4', 'v5', 'chrom-2', 'site_start', 'site_stop', 'site', 'v6', 'dir'))
+data_20 <- read.csv(paste(working_dir,"SQK-NBD114-24_barcode20.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed", sep=""), sep = "", header = FALSE, 
+                    col.names = c('chrom', 'm_start', 'm_stop', 'met_type', 'total_reads', 'met_dir', 'met_st_1', 'met_st_2', 'color','reads_all', 'methyl', 'methyl_reads', 'non_methyl_reads',
+                                  'v1','v2','v3', 'v4', 'v5', 'chrom-2', 'site_start', 'site_stop', 'site', 'v6', 'dir'))
+data_21 <- read.csv(paste(working_dir,"SQK-NBD114-24_barcode21.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed", sep=""), sep = "", header = FALSE, 
+                    col.names = c('chrom', 'm_start', 'm_stop', 'met_type', 'total_reads', 'met_dir', 'met_st_1', 'met_st_2', 'color','reads_all', 'methyl', 'methyl_reads', 'non_methyl_reads',
+                                  'v1','v2','v3', 'v4', 'v5', 'chrom-2', 'site_start', 'site_stop', 'site', 'v6', 'dir'))
+data_22 <- read.csv(paste(working_dir,"SQK-NBD114-24_barcode22.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed", sep=""), sep = "", header = FALSE, 
+                    col.names = c('chrom', 'm_start', 'm_stop', 'met_type', 'total_reads', 'met_dir', 'met_st_1', 'met_st_2', 'color','reads_all', 'methyl', 'methyl_reads', 'non_methyl_reads',
+                                  'v1','v2','v3', 'v4', 'v5', 'chrom-2', 'site_start', 'site_stop', 'site', 'v6', 'dir'))
+
+data_23 <- read.csv(paste(working_dir,"SQK-NBD114-24_barcode23.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed", sep=""), sep = "", header = FALSE, 
+                    col.names = c('chrom', 'm_start', 'm_stop', 'met_type', 'total_reads', 'met_dir', 'met_st_1', 'met_st_2', 'color','reads_all', 'methyl', 'methyl_reads', 'non_methyl_reads',
+                                  'v1','v2','v3', 'v4', 'v5', 'chrom-2', 'site_start', 'site_stop', 'site', 'v6', 'dir'))
+data_24 <- read.csv(paste(working_dir,"SQK-NBD114-24_barcode24.GCF_003698455.sorted.6mA_GATC_GCF_003698455.bed", sep=""), sep = "", header = FALSE, 
+                    col.names = c('chrom', 'm_start', 'm_stop', 'met_type', 'total_reads', 'met_dir', 'met_st_1', 'met_st_2', 'color','reads_all', 'methyl', 'methyl_reads', 'non_methyl_reads',
+                                  'v1','v2','v3', 'v4', 'v5', 'chrom-2', 'site_start', 'site_stop', 'site', 'v6', 'dir'))
+data_01$sample<- 'N24-1'
+data_02$sample<- 'N24-2'
+data_19$sample<- 'H2-1'
+data_20$sample<- 'H2-2'
+data_21$sample<- 'N2-1'
+data_22$sample<- 'N2-2'
+data_23$sample<- 'H24-1'
+data_24$sample<- 'H24-2'
+data_01$group<- 'N24'
+data_02$group<- 'N24'
+data_19$group<- 'H2'
+data_20$group<- 'H2'
+data_21$group<- 'N2'
+data_22$group<- 'N2'
+data_23$group<- 'H24'
+data_24$group<- 'H24'
+data_01$rel_pos<- data_01$m_start-data_01$site_start
+data_02$rel_pos<- data_02$m_start-data_02$site_start
+data_19$rel_pos<- data_19$m_start-data_19$site_start
+data_20$rel_pos<- data_20$m_start-data_20$site_start
+data_21$rel_pos<- data_21$m_start-data_21$site_start
+data_22$rel_pos<- data_22$m_start-data_22$site_start
+data_23$rel_pos<- data_23$m_start-data_23$site_start
+data_24$rel_pos<- data_24$m_start-data_24$site_start
+data_all <-rbind(data_01,data_02, data_19, data_20, data_21, data_22, data_23, data_24)
+data_summary_sample <- data_all %>%
+  group_by(sample, rel_pos) %>%
+  summarize(mean_methyl = mean(methyl), mean_reads = mean(total_reads), .groups="keep")
+?summarise()
+ggplot(data_summary_sample, aes(x = rel_pos, y = mean_methyl*mean_reads)) + geom_bar(stat = "identity") +
+  facet_wrap(. ~ sample, ncol=3)
+
+data_all_methyl_a <- data_all[data_all$rel_pos==1&data_all$total_reads>10&data_all$methyl>35,]
+#data_all_methyl_a_chrom <- data_all[data_all$rel_pos==7 & data_all$chrom=='NZ_CP008706.1',]
+
+ggplot(data_all_methyl_a, aes(x=methyl, color=sample)) +
+  geom_density() + facet_grid(group ~ .)
+
+data_all_methyl_a_10_reads <- data_all_methyl_a[data_all_methyl_a$total_reads>10,]
+data_all_methyl_a_35 <- data_all_methyl_a[data_all_methyl_a$methyl>35&data_all_methyl_a$total_reads>10,]
+data_all_methyl_a_35$pos_id <-paste(data_all_methyl_a_35$chrom,data_all_methyl_a_35$m_start,data_all_methyl_a_35$met_dir, sep = "_")
+data_all_methyl_a_35_pos <- unique(data_all_methyl_a_35$pos_id)
+
+data_all_methyl_a_10_reads$pos_id <-paste(data_all_methyl_a_10_reads$chrom,
+                                          data_all_methyl_a_10_reads$m_start,
+                                          data_all_methyl_a_10_reads$met_dir, sep = "_")
+data_10_samples<- data_all_methyl_a_10_reads %>%
+  group_by(sample,pos_id)%>%
+  summarize(mean_methyl = mean(methyl), .groups = "keep")
+data_10_samples_wide <-data_10_samples %>% 
+  pivot_wider(names_from = sample, 
+              values_from = mean_methyl)
+
+data_35_samples<- data_all_methyl_a_35 %>%
+  group_by(sample,pos_id)%>%
+  summarize(mean_methyl = mean(methyl), .groups = "keep")
+data_35_samples_wide <-data_35_samples %>% 
+  pivot_wider(names_from = sample, 
+              values_from = mean_methyl)
+data_35_samples_wide[is.na(data_35_samples_wide)] <- 0
+data_35_group<- data_all_methyl_a_35 %>%
+  group_by(group,pos_id, chrom,m_start, met_dir)%>%
+  summarize(mean_methyl = mean(methyl), .groups = "keep")
+data_35_group_wide <-data_35_group %>% 
+  pivot_wider(names_from = group, 
+              values_from = mean_methyl)
+data_35_group_wide[is.na(data_35_group_wide)] <- 0
+
+#spearman correlation
+library(GGally)
+ggcorr(data_35_samples_wide[,2:9], method = c("all.obs", "spearman"), label = TRUE)
+?ggcorr()
+write_tsv(data_35_samples_wide, paste(working_dir, "data_35_samples.txt", sep = ""))
+data_all_methyl_a_35_5 <- data_all_methyl_a[data_all_methyl_a$methyl>35&data_all_methyl_a$total_reads>5,]
+data_all_methyl_a_35_5$pos_id <-paste(data_all_methyl_a_35_5$chrom,data_all_methyl_a_35_5$m_start,data_all_methyl_a_35_5$met_dir, sep = "_")
+data_35_samples_5<- data_all_methyl_a_35_5 %>%
+  group_by(sample,pos_id)%>%
+  summarize(mean_methyl = mean(methyl), .groups = "keep")
+
+data_35_samples_wide_5 <-data_35_samples_5 %>% 
+  pivot_wider(names_from = sample, 
+              values_from = mean_methyl)
+data_35_samples_wide_5[is.na(data_35_samples_wide_5)] <- 0
+ggcorr(data_35_samples_wide_5[,2:9], method = c("all.obs", "spearman"), label = TRUE)
+heatmap(as.matrix(data_35_samples_wide_5[,2:9]))
+heatmap(as.matrix(data_35_samples_wide[,2:9]))
+
+data_all <-rbind(data_01[],data_02, data_19, data_20, data_21, data_22, data_23, data_24)
+
+
+#bed-files
+
+#bed-files for clusters
+bed_file <- data_35_group_wide
+bed_file %>% relocate(chrom)
+bed_file$start = bed_file$m_start-15
+bed_file$stop = bed_file$m_start+15
+new_bed <- bed_file %>% relocate(chrom, start, stop, met_dir)
+write_tsv(new_bed, paste(working_dir, "dam_groups_35_31bp.bed", sep = ""))
+### 10% of coverage
+
+data_all_methyl_a_1 <- data_all[data_all$rel_pos==1 & data_all$met_dir=="+",]
+H2_1_mean<-mean(data_all_methyl_a_1[data_all_methyl_a_1$sample=='H2-1',]$total_reads)
+H2_2_mean<-mean(data_all_methyl_a_1[data_all_methyl_a_1$sample=='H2-2',]$total_reads)
+N2_1_mean<-mean(data_all_methyl_a_1[data_all_methyl_a_1$sample=='N2-1',]$total_reads)
+N2_2_mean<-mean(data_all_methyl_a_1[data_all_methyl_a_1$sample=='N2-2',]$total_reads)
+H24_1_mean<-mean(data_all_methyl_a_1[data_all_methyl_a_1$sample=='H24-1',]$total_reads)
+H24_2_mean<-mean(data_all_methyl_a_1[data_all_methyl_a_1$sample=='H24-2',]$total_reads)
+N24_1_mean<-mean(data_all_methyl_a_1[data_all_methyl_a_1$sample=='N24-1',]$total_reads)
+N24_2_mean<-mean(data_all_methyl_a_1[data_all_methyl_a_1$sample=='N24-2',]$total_reads)
+
+data_all_methyl_a_1_10 <- data_all_methyl_a_1[(data_all_methyl_a_1$sample=='H2-1'& data_all_methyl_a_1$total_reads > 0.2*H2_1_mean)|
+                                                (data_all_methyl_a_1$sample=='H2-2'& data_all_methyl_a_1$total_reads > 0.2*H2_2_mean)|
+                                                (data_all_methyl_a_1$sample=='N2-1'& data_all_methyl_a_1$total_reads > 0.2*N2_1_mean)|
+                                                (data_all_methyl_a_1$sample=='N2-2'& data_all_methyl_a_1$total_reads > 0.2*N2_2_mean)|
+                                                (data_all_methyl_a_1$sample=='H24-1'& data_all_methyl_a_1$total_reads > 0.2*H24_1_mean)|
+                                                (data_all_methyl_a_1$sample=='H24-2'& data_all_methyl_a_1$total_reads > 0.2*H24_2_mean)|
+                                                (data_all_methyl_a_1$sample=='N24-1'& data_all_methyl_a_1$total_reads > 0.2*N24_1_mean)|
+                                                (data_all_methyl_a_1$sample=='N24-2'& data_all_methyl_a_1$total_reads > 0.2*N24_2_mean), ]
+
+
+
+
+data_all_methyl_a_1_10_35 <- data_all_methyl_a_1_10[data_all_methyl_a_1_10$methyl>35,]
+
+data_all_methyl_a_1_10_35$pos_id <-paste(data_all_methyl_a_1_10_35$chrom,
+                                         data_all_methyl_a_1_10_35$m_start,
+                                         data_all_methyl_a_1_10_35$met_dir, 
+                                         sep = "_")
+data_all_methyl_a_1_10_35_samples <- data_all_methyl_a_1_10_35 %>%
+  group_by(sample,pos_id)%>%
+  summarize(mean_methyl = mean(methyl), .groups = "keep")
+
+data_all_methyl_a_1_10_35_samples_wide <-data_all_methyl_a_1_10_35_samples %>% 
+  pivot_wider(names_from = sample, 
+              values_from = mean_methyl)
+data_all_methyl_a_1_10_35_samples_wide[is.na(data_all_methyl_a_1_10_35_samples_wide)] <- 0
+ggcorr(data_all_methyl_a_1_10_35_samples_wide[,2:9], method = c("all.obs", "spearman"), label = TRUE)
+heatmap(as.matrix(data_all_methyl_a_1_10_35_samples_wide[,2:9]))
+heatmap(as.matrix(data_35_samples_wide[,2:9]))
+
