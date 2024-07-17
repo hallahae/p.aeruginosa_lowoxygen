@@ -1,0 +1,73 @@
+# this is the script i used in order to make my volcano plots to show differential gene expression between the 2hr and 24hr timepoints of my samples
+
+library(dplyr)
+
+res2h$minus_log10_pvalue <-  -log10(res2h$pvalue)
+res24h$minus_log10_pvalue <- -log10(res24h$pvalue)
+
+res2h_df <- as.data.frame(res2h)
+
+res24h_df <- as.data.frame(res24h)
+
+setwd("/Users/emilyhallahan/Desktop/Research_Project")
+write.csv(res2h_df, file = "res2h_hyp_2.csv", row.names = TRUE)
+write.csv(res24h_df, file = "res24h_hyp_2.csv", row.names = TRUE)
+
+print(res2h_hyp)
+
+names(res2h)
+
+res2h_hyp_2$regulation <- ifelse(res2h_hyp_2$log2FoldChange > 1 & res2h_hyp_2$minus_log10_pvalue > 1.301, "Upregulated",
+                                          ifelse(res2h_hyp_2$log2FoldChange < -1 & res2h_hyp_2$minus_log10_pvalue > 1.301, "Downregulated", "Not Significant"))
+
+significant_genes <- subset(res2h_hyp_2, abs(log2FoldChange) > 1 & minus_log10_pvalue > 1.301)
+
+ggplot(res2h_hyp_2, aes(x = log2FoldChange, y = minus_log10_pvalue)) +
+  geom_point(aes(color = regulation), alpha = 0.6) +
+  scale_color_manual(values = c("Upregulated" = "red", "Downregulated" = "blue", "Not Significant" = "grey")) +
+  labs(
+    x = "Log2 Fold Change",
+    y = "-Log10 P-value",
+    title = "Differentially Expressed Genes After 2h Hypoxia",
+    color = "Regulation"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right") +
+  geom_text_repel(
+    data = significant_genes,  # Only label significant genes
+    aes(label = Gene),
+    size = 3,
+    max.overlaps = 10,  # Increase the max overlaps allowed
+    box.padding = 0.5,
+    point.padding = 0.5,
+    segment.color = 'grey50',
+    nudge_y = 0.1  # Adjust to nudge labels
+  )
+
+res24h_hyp_2$regulation <- ifelse(res24h_hyp_2$log2FoldChange > 1 & res24h_hyp_2$minus_log10_pvalue > 1.301, "Upregulated",
+                           ifelse(res24h_hyp_2$log2FoldChange < -1 & res24h_hyp_2$minus_log10_pvalue > 1.301, "Downregulated", "Not Significant"))
+
+print(res24h_hyp_2)
+
+ggplot(res24h_hyp_2, aes(x = log2FoldChange, y = minus_log10_pvalue)) +
+  geom_point(aes(color = regulation), alpha = 0.6) +
+  scale_color_manual(values = c("Upregulated" = "red", "Downregulated" = "blue", "Not Significant" = "grey")) +
+  labs(
+    x = "Log2 Fold Change",
+    y = "-Log10 P-value",
+    title = "Differentially Expressed Genes After 24h Hypoxia",
+    color = "Regulation"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right") +
+  geom_text_repel(
+    data = significant_genes,  # Only label significant genes
+    aes(label = Gene),
+    size = 3,
+    max.overlaps = 8,  # Increase the max overlaps allowed
+    box.padding = 0.5,
+    point.padding = 0.5,
+    segment.color = 'grey50',
+    nudge_y = 0.1  # Adjust to nudge labels
+  )
+
