@@ -1,0 +1,3 @@
+# I used bowtie in order to align my samples to the reference genome
+
+bowtie2 -x /mnt/md0/kroegerlab/common/pa_hypoxia/bakta_annotation/pa6D92H -1 /mnt/md0/kroegerlab/common/pa_hypoxia/rna_seq/fastq_trimmed/D1-H3_R1_001.trimmed.fastq.gz -2 fastq_trimmed/D1-H3_R2_001.trimmed.fastq.gz  --very-sensitive-local -p 10 -S D1-H3.pa6D92H.sam
