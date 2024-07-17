@@ -1,0 +1,5 @@
+# bakta was used in order to annotate the genomes to get annotated protein files to use defensefinder for methyltransferases
+
+bakta --threads 8 --db /mnt/md0/kroegerlab/db/bakta_db genomic fasta
+
+#the genomic fasta file part contained the path to my genomic fasta file i wanted to annotate, in this case the samples
