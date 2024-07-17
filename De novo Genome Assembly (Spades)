@@ -1,0 +1,4 @@
+# in order to carry out de novo assembly I used the spades command 
+# this was to assemble the genome without the use of the reference, in preparation for creating my first phylogeny using panACoTA
+
+spades -1 data/H1_1_p_clipped.fastq.gz -2 data/H1_2_p_clipped.fastq.gz -o H1_clipped_spades_isolate --isolate
