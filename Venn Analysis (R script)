@@ -1,0 +1,36 @@
+# I used this RStudio script to carry out my VennDiagram analysis for H1 and H2
+
+install.packages('VennDiagram')
+library(ggplot2)
+library(dplyr)
+library(VennDiagram)
+install.packages("readr")
+
+# Load the readr package
+library(readr)
+working_dir_pa = "/Users/emilyhallahan/Downloads"
+data_mut <- read_csv(paste(working_dir_pa,"data.mut", sep="")) #all_point_mutations
+data_mut2 <- data_mut[!(data_mut$Sample=='Sample'),]
+non_syn_notn_data <- data_mut2[data_mut2$`Syn/Non-Syn`!='synonymous' & data_mut2$Ref_nuc!='N',]
+data_summary_sample_pa <- non_syn_notn_data %>%
+  group_by(Sample) %>%
+  summarize(n_mut = n())
+notn_data <- data_mut2[data_mut2$Ref_nuc!='N',]
+data_summary_sample_pa_not_n <- notn_data %>%
+  group_by(Sample, `Syn/Non-Syn`) %>%
+  summarize(n_mut = n(), .groups = "keep")
+#gene level
+data_set1 <- unique(non_syn_notn_data[non_syn_notn_data$Sample=='H1',]$Locus_Tag)
+data_set2 <- unique(non_syn_notn_data[non_syn_notn_data$Sample=='H2',]$Locus_Tag)
+venn.diagram(x = list(data_set1, data_set2), 
+             category.names = c("H1", "H2"),
+             filename = paste(working_dir_pa,"H1_H2_nonsyn_notn_venn_genes", sep=""))
+#conclusions: 2515 common genes between two samples 
+#mutation_level
+non_syn_notn_data$Uniq_pos <- paste(non_syn_notn_data$Chrom,non_syn_notn_data$Position, sep = ":")
+data_set3 <- unique(non_syn_notn_data[non_syn_notn_data$Sample=='H1',]$Uniq_pos)
+data_set4 <- unique(non_syn_notn_data[non_syn_notn_data$Sample=='H2',]$Uniq_pos)
+venn.diagram(x = list(data_set3, data_set4), 
+             category.names = c("H1", "H2"),
+             filename = paste(working_dir_pa,"H1_H2_nonsyn_notn_venn_point_mut", sep=""))
+
