@@ -1,0 +1,35 @@
+# this is an example of the code used in order to find the GO terms from uniref ID for my reference
+
+from sys import argv
+#contig_1        Prodigal        CDS     1622    2020    .       -       0       ID=pa6D92H_00010;Name=autoinducer binding domain-containing protein;locus_tag=pa6D92H_00010;product=autoinducer binding domain-containing protein;Dbxref=SO:0001217,UniRef:UniRef50_UPI0021F1B044,UniRef:UniRef90_UPI0021F1B044
+f = open(argv[1], 'r')
+out  = open(argv[1]+".breseq.gff3", "w")
+
+for line in f:
+    sline = line.strip().split("\t")
+    if len(sline) <3:
+        out.write(f'{line}')
+    else:
+        if sline[2] != "CDS":
+            out.write(f'{line}')
+        else:
+            chrom = sline[0]
+            annot_method = sline[1]
+            cds = sline[2]
+            start = sline[3]
+            stop = sline[4]
+            field = sline[5]
+            dir_g = sline[6]
+            filed_1 = sline[7]
+            descr = sline[8]
+            descr_list = descr.split(";")
+            name = descr_list[1]
+            id_lt = descr_list[0]
+            new_name = f'{name.split("=")[0]}={id_lt.split("=")[1]}'
+            new_descr = descr_list
+            new_descr[1] = new_name
+            new_descr_str = ";".join(new_descr)
+            new_sline = sline
+            new_sline[8] = new_descr_str
+            new_line_str = "\t".join(new_sline)
+            out.write(f'{new_line_str}\n')
