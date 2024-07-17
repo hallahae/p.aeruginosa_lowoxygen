@@ -1,0 +1,36 @@
+# i used this notebook in order to find out which locus tag in my samples/reference corresponded to each GO term
+
+import csv
+
+
+with open("pa6D92H.gff3.breseq.gff3") as file:
+
+    locus_product_table = []
+
+    for line in file:
+        if "CDS" not in line:
+            continue
+    
+        fields = line.strip().split("\t")
+
+       
+        attributes = fields[8].split(";")
+        locus_tag = next(attr.split("=")[1] for attr in attributes if attr.startswith("locus_tag"))
+        product = next(attr.split("=")[1] for attr in attributes if attr.startswith("product"))
+
+   
+        locus_product_table.append((locus_tag, product))
+
+with open("locus_product_table.csv", "w", newline="") as csvfile:
+    writer = csv.writer(csvfile)
+ 
+    writer.writerow(["Locus Tag", "Product"])
+   
+    writer.writerows(locus_product_table)
+
+with open("locus_product_table.tsv", "w", newline="") as tsvfile:
+    writer = csv.writer(tsvfile, delimiter="\t")
+   
+    writer.writerow(["Locus Tag", "Product"])
+   
+    writer.writerows(locus_product_table)
