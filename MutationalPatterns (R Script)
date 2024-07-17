@@ -1,0 +1,66 @@
+# this is the script I used in order to get the SBS cosmic mutational signatures associated with my samples
+
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("MutationalPatterns")
+library(MutationalPatterns)
+
+library(BSgenome)
+head(available.genomes())
+current_dir <- getwd()
+
+# Print the current working directory
+print(current_dir)
+    
+library(BSgenome)
+forgeBSgenomeDataPkg(paste('/Users/emilyhallahan/Desktop/Split_Fasta/pa6D92H_seed.txt', sep=""), replace=TRUE)
+
+ref_genome <- "BSgenome.PA.pa6D92H"
+library(ref_genome, character.only = TRUE)
+
+
+BSgenome.PA.pa6D92H
+seqnames(BSgenome.PA.pa6D92H)
+seqinfo(BSgenome.PA.pa6D92H)
+
+vcf_files <- c('/Users/emilyhallahan/Desktop/Sample_VCF/H1.vcf',
+'/Users/emilyhallahan/Desktop/Sample_VCF/H2.vcf',
+'/Users/emilyhallahan/Desktop/Sample_VCF/N1.vcf',
+'/Users/emilyhallahan/Desktop/Sample_VCF/N2.vcf')
+sample_names <- c('H1', 'H2', 'N1', 'N2')
+
+grl <- read_vcfs_as_granges(vcf_files, sample_names, ref_genome, change_seqnames = F, group = 'none')
+group <- c(rep("H", 2,), rep("N", 2))
+muts <- mutations_from_vcf(grl[[1]])
+types <- mut_type(grl[[1]])
+context <- mut_context(grl[[1]], ref_genome)
+type_context <- type_context(grl[[1]], ref_genome)
+type_occurences <- mut_type_occurrences(grl, ref_genome)
+plot_spectrum(type_occurences, by = group, CT= TRUE, legend= TRUE)
+
+mut_mat <- mut_matrix(vcf_list = grl, ref_genome = ref_genome)
+plot_96_profile(mut_mat[, c(1,2)])
+mut_mat <- mut_mat + 0.0001
+
+library("NMF")
+nmf_res <- extract_signatures(mut_mat, rank = 1, nrun = 10, single_core = TRUE)
+signatures <- get_known_signatures()
+nmf_res <- rename_nmf_signatures(nmf_res, signatures, cutoff = 0.75)
+colnames(nmf_res$signatures)
+plot_96_profile(nmf_res$signatures, condensed = TRUE)
+fit_res <- fit_to_signatures(mut_mat, signatures)
+plot_contribution(fit_res$contribution,
+                  coord_flip = FALSE,
+                  mode = "absolute")
+strict_refit <- fit_to_signatures_strict(mut_mat, signatures, max_delta = 0.004)
+fit_res_strict <- strict_refit$fit_res
+plot_contribution(fit_res_strict$contribution,
+                  coord_flip = FALSE,
+                  mode = 'absolute')
+merged_signatures <- merge_signatures(signatures, cos_sim_cutoff = 0.8)
+strict_refit_m <- fit_to_signatures_strict(mut_mat, merged_signatures, max_delta = 0.004)
+fit_res_strict_m <- strict_refit_m$fit_res
+plot_contribution(fit_res_strict_m$contribution,
+                  coord_flip = FALSE,
+                  mode = 'absolute')
