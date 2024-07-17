@@ -1,0 +1,4 @@
+# i used these commands in order to sort the fasta files for each of my nanopore barcode files, after i had sorted them into the top 100 hits
+
+bedtools getfasta -s -fi ../genomes/GCF_003698455-Copy1.1_ASM369845v1_genomic.fna -bed barcode01_first_100_sorted.bed
+seqkit subseq --bed barcode01_first_100_sorted-col_AT.csv -d 15 -u 15 -U ../genomes/GCF_003698455.1_ASM369845v1_genomic.fna.gz > barcode01_first_100_sorted-col_AT_15-15.fasta
