@@ -1,0 +1,3 @@
+# this is the code I used in order to check the quality of my samples obtained
+
+fastqc -o kroegerlab/common/pa_hypoxia/data/fastqc kroegerlab/common/pa_hypoxia/data
