@@ -1,0 +1,4 @@
+# I used DefenseFinder on my reference genome in order to characterise and hypothesise the different methyltransferases present in my samples
+
+Conda activate defensefinder
+defense-finder run -o ref_DF pa6D92H.faa
