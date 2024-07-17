@@ -1,0 +1,3 @@
+# this was used in order to see the different genes present in the reference genome file
+
+featureCounts -p --countReadPairs -T 12 -t gene -f -O -a .kroegerlab/common/pa_hypoxia/bakta_annotation/pa6D92H.gff -o pa_samples_feature_counts.txt *.bam
