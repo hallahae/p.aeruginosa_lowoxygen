@@ -4,4 +4,4 @@
 # I carried out a wide range of bioinformatic analyses based on genomic, transcriptomic and epigenomic data
 # This code is open-source, it is a way in which i kept track of all code used in analysis for my dissertation
 
-# I used a wide array of different bioinformatic methods including python, Linux and RStudio
+# I used a wide array of different bioinformatic methods including Python, Linux and RStudio
