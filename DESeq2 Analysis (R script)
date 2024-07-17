@@ -1,0 +1,80 @@
+# this is the script i used in order to carry out differential gene expression analysis, the results file from this was used in a wide array of my other analyses as well as the final files created
+
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install(version = "3.18")
+
+BiocManager::install("DESeq2")
+library(DESeq2)
+
+
+
+counts <- read.table("/Users/emilyhallahan/Downloads/pa_samples_feature_counts.txt", header = TRUE, row.names = 1)
+counts <- counts[, -c(1:5)]
+
+sample_names <- c("X2h-H1.pa6D92H.sorted.bam", "X2h-H2.pa6D92H.sorted.bam", "X2h-H3.pa6D92H.sorted.bam", 
+                  "X2h-N1.pa6D92H.sorted.bam", "X2h-N2.pa6D92H.sorted.bam", "X2h-N3.pa6D92H.sorted.bam", 
+                  "D1-H1.pa6D92H.sorted.bam", "D1-H2.pa6D92H.sorted.bam", "D1-H3.pa6D92H.sorted.bam", 
+                  "D1-N1.pa6D92H.sorted.bam", "D1-N2.pa6D92H.sorted.bam", "D1-N3.pa6D92H.sorted.bam")
+
+# Extract conditions and replicates from sample names using regular expressions
+conditions <- sub("^X?(\\d+h|D1)-.*", "\\1", sample_names)
+replicates <- sub(".*-(H\\d|N\\d)\\..*", "\\1", sample_names)
+
+# Create colData dataframe
+colData <- data.frame(
+  SampleID = sample_names,
+  condition = conditions,
+  replicate = replicates
+)
+
+# Print the colData dataframe
+print(colData)
+
+colData$condition <- c('2h-Hyp', '2h-Hyp', '2h-Hyp', '2h-Nor', '2h-Nor', '2h-Nor','24h-Hyp', '24h-Hyp', '24h-Hyp', '24h-Nor', '24h-Nor', '24h-Nor')
+
+rownames(colData) <- colnames(counts)
+
+# Verify the match
+print(rownames(colData))
+print(colnames(counts))
+all(colnames(counts) %in% rownames(colData))
+
+colData$condition <- as.factor(colData$condition)
+colData$replicate <- as.factor(colData$replicate)
+
+
+library(DESeq2)
+dds <- DESeqDataSetFromMatrix(countData = counts, colData = colData, design = ~ condition)
+
+# Run DESeq2 analysis
+dds <- DESeq(dds)
+dds
+results <- results(dds)
+
+write.csv(as.data.frame(results), file = "/Users/emilyhallahan/Desktop/Research_Project/DESeq2_results.csv")
+
+
+# Summarize results
+summary(results)
+
+# Visualization
+plotMA(results, ylim = c(-2, 2))
+
+rld <- rlog(dds)
+
+library(ggplot2)
+plotPCA(rld, intgroup = "condition") +
+  ggtitle("Principal Component Analysis of Sample Groups")
+
+#########################################
+getwd()
+
+res2h <- results(dds, contrast=c("condition","2h-Hyp","2h-Nor"))
+
+res24h <- results(dds, contrast=c("condition","24h-Hyp","24h-Nor"))
+res24h
+
+setwd("/Users/emilyhallahan/Desktop/Research_Project")
+write.csv(res2h, file = "res2h_hyp_2.csv", row.names = TRUE)
+write.csv(res24h, file = "res24h_hyp_2.csv", row.names = TRUE)
