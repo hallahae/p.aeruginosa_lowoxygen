@@ -1,0 +1,81 @@
+# the python notebook code I created in order to categorize the different mutations found in each sample into different .csv files
+# this was for ease of analysis, I used my H1 sample as an example
+
+import sys
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+path = "/mnt/md0/kroegerlab/common/pa_hypoxia/H1_breseq_locus_tag/output/"
+table_breseqH1 = pd.read_html(path+"index.html")
+
+new_path = path.split('/')
+sample = new_path[-3]
+
+table_breseqH1[1]['Predicted mutations'].to_csv(path+'index_parsedH1.csv')
+
+out_point = open(path+'index_pointH1.csv', "w")
+out_indel = open(path+'index_indelH1.csv', 'w')
+out_intergenic = open(path+"index_intergenicH1.csv", "w")
+out_noncoding = open(path+"index_noncodingH1.csv", "w")
+out_point.write(f'Sample, Chrom, Position, Substitution, Ref_nuc, Alt_nuc, Mutation Type, Ref_AA, Alt_AA, Syn/Non-Syn, Pos_AA, Ref_Codon, Alt_Codon, Locus_Tag, Description\n')
+new_path = path.split('/')
+sample = new_path[-3].split('_')[0]
+with open(path+'index_parsedH1.csv') as f:
+    header = f.readline()
+    for line in f:
+        line = line.strip().split(",")
+        chrom = line[2]
+        pos = line[3]
+        mutations = line[4].split("→")
+        ref_nuc = mutations[0]
+        
+        if len(ref_nuc) >1:
+            new_line = ",".join(line)
+            out_indel.write(f'{new_line}\n')
+            continue
+        else:
+            print(line)
+            alt_nuc = mutations[1]
+            ref_alt = f' {ref_nuc}>{alt_nuc}'
+            annotation = line[5].split("(")
+            aa = annotation[0].split("x")[0].strip()
+            if len(aa) <9:
+                ref_aa = aa[0]
+                pos_aa = aa[1:-2]
+                alt_aa = aa[-1]
+                if ref_aa == alt_aa :
+                    syn = 'synonymous'
+                else: 
+                    syn = 'non-synonymous'
+                codons = annotation[1].split("→")
+                ref_cod = codons[0]
+                alt_cod = codons[1][:-1]
+                ref_prot = line[6][:-2]
+                desc = line[7]
+                mut_type = 'coding' 
+                out_point.write(f'{sample},{chrom},{pos},{ref_alt},{ref_nuc},{alt_nuc}, {mut_type},{ref_aa},{alt_aa}, {syn}, {pos_aa}, {ref_cod}, {alt_cod}, {ref_prot}, {desc}\n')
+            elif aa == "intergenic":
+                mut_type = aa
+                rel_pos = annotation[1][1:-2]
+                prot_1 = line[6].split("/")[0].split(".")[0]
+                prot_2 = line[6].split("/")[1].split(".")[0][2:]
+                proteins = [prot_1, prot_2]
+                desc = line[7].split("/")
+                desc_1 = desc[0]
+                desc_2 = desc[1]
+                descriptions = [desc_1, desc_2]
+                i = 0
+                for i in range(0,len(proteins)):
+                    out_intergenic.write(f'{sample},{chrom},{pos},{ref_alt},{ref_nuc},{alt_nuc},{mut_type}, {rel_pos}, {proteins[i]},{descriptions[i]}\n')
+                    i+=1
+            elif aa == "noncoding":
+                print("xxx")
+                mut_type = aa
+                rel_pos = annotation[1].split("x")[0]
+                id_rna = line[6]
+                desc = line[7]
+                out_noncoding.write(f'{sample},{chrom},{pos},{ref_alt},{ref_nuc},{alt_nuc},{mut_type}, {rel_pos}, {id_rna},{desc}\n')
+            else:
+                print(line)
+            
